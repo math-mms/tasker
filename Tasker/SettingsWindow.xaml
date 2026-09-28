@@ -3,39 +3,40 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Settings" Height="700" Width="600"
         WindowStartupLocation="CenterOwner"
-        Background="#f4f6fb">
+        Background="#F4F6FB">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="Customization" FontSize="24" FontWeight="Bold" Foreground="#1d2433" Margin="0,0,0,20"/>
+        <TextBlock Text="Customization" FontSize="24" FontWeight="Bold" Foreground="#20243A" Margin="0,0,0,20"/>
 
-        <TabControl Grid.Row="1" Background="#ffffff" Margin="0,0,0,20">
+        <TabControl Grid.Row="1" Background="#ffffff" Margin="0,0,0,10">
             <!-- Widget Tab -->
             <TabItem Header="Active Widget" Margin="5,0">
                 <Grid Margin="15">
                     <ScrollViewer>
                         <StackPanel>
-                            <TextBlock Text="Transparency" FontSize="12" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,8"/>
+                            <TextBlock Text="Transparency" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,8"/>
                             <Grid Margin="0,0,0,20">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
                                 <Slider x:Name="OpacitySlider" Minimum="0" Maximum="1" Value="1" SmallChange="0.05" LargeChange="0.1"/>
-                                <TextBlock Grid.Column="1" x:Name="OpacityValue" Text="100%" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="#1d2433" FontWeight="SemiBold"/>
+                                <TextBlock Grid.Column="1" x:Name="OpacityValue" Text="100%" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="#20243A" FontWeight="SemiBold"/>
                             </Grid>
 
-                            <TextBlock Text="Sizes" FontSize="12" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,8"/>
+                            <TextBlock Text="Sizes" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,8"/>
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Max Width" Foreground="#333" VerticalAlignment="Center"/>
+                                <TextBlock Text="Max Width" Foreground="#39415C" VerticalAlignment="Center"/>
                                 <Slider Grid.Column="0" x:Name="MaxWidthSlider" Minimum="200" Maximum="500" Value="300" SmallChange="10" LargeChange="50" Margin="60,0,0,0"/>
                                 <TextBlock Grid.Column="1" x:Name="MaxWidthValue" Text="300" Margin="10,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                             </Grid>
@@ -45,7 +46,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Title Size" Foreground="#333" VerticalAlignment="Center"/>
+                                <TextBlock Text="Title Size" Foreground="#39415C" VerticalAlignment="Center"/>
                                 <Slider Grid.Column="0" x:Name="WidgetTitleSizeSlider" Minimum="12" Maximum="24" Value="16" SmallChange="1" LargeChange="2" Margin="60,0,0,0"/>
                                 <TextBlock Grid.Column="1" x:Name="WidgetTitleSizeValue" Text="16" Margin="10,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                             </Grid>
@@ -55,25 +56,28 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Subtitle Size" Foreground="#333" VerticalAlignment="Center"/>
+                                <TextBlock Text="Subtitle Size" Foreground="#39415C" VerticalAlignment="Center"/>
                                 <Slider Grid.Column="0" x:Name="WidgetSubtitleSizeSlider" Minimum="8" Maximum="16" Value="11" SmallChange="1" LargeChange="1" Margin="60,0,0,0"/>
                                 <TextBlock Grid.Column="1" x:Name="WidgetSubtitleSizeValue" Text="11" Margin="10,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                             </Grid>
 
-                            <TextBlock Text="Colors" FontSize="12" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,12"/>
+                            <TextBlock Text="Widget Font Family" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,6"/>
+                            <TextBox x:Name="WidgetFontFamilyInput" Height="32" Padding="8,4" Text="Segoe UI" Margin="0,0,0,18"/>
+
+                            <TextBlock Text="Colors" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,12"/>
                             <StackPanel Margin="0,0,0,8">
-                                <TextBlock Text="Background Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="WidgetBgColorInput" Height="32" Padding="8,4" Text="#1f2b44" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Background Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="WidgetBgColorInput" Height="32" Padding="8,4" Text="#171A3B" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="WidgetBgColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,8">
-                                <TextBlock Text="Title Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="WidgetTitleColorInput" Height="32" Padding="8,4" Text="#FFFFFF" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Title Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="WidgetTitleColorInput" Height="32" Padding="8,4" Text="#F8F7FF" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="WidgetTitleColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,8">
-                                <TextBlock Text="Text Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="WidgetTextColorInput" Height="32" Padding="8,4" Text="#DFEAFC" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Text Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="WidgetTextColorInput" Height="32" Padding="8,4" Text="#BFC9F5" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="WidgetTextColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
                         </StackPanel>
                     </ScrollViewer>
@@ -85,43 +89,51 @@
                 <Grid Margin="15">
                     <ScrollViewer>
                         <StackPanel>
-                            <TextBlock Text="Main Colors" FontSize="12" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,12"/>
+                            <TextBlock Text="Main Colors" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,12"/>
                             <StackPanel Margin="0,0,0,8">
-                                <TextBlock Text="Background Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="AppBgColorInput" Height="32" Padding="8,4" Text="#f4f6fb" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Background Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="AppBgColorInput" Height="32" Padding="8,4" Text="#11152E" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="AppBgColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,8">
-                                <TextBlock Text="Panel/Card Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="AppPanelColorInput" Height="32" Padding="8,4" Text="#ffffff" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Panel/Card Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="AppPanelColorInput" Height="32" Padding="8,4" Text="#20264B" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="AppPanelColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,8">
-                                <TextBlock Text="Primary Text Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="AppTextColorInput" Height="32" Padding="8,4" Text="#1d2433" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Primary Text Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="AppTextColorInput" Height="32" Padding="8,4" Text="#F4F5FF" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="AppTextColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,20">
-                                <TextBlock Text="Secondary Text Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="AppSecTextColorInput" Height="32" Padding="8,4" Text="#5e6a81" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Secondary Text Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="AppSecTextColorInput" Height="32" Padding="8,4" Text="#B7C0E8" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="AppSecTextColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
 
-                            <TextBlock Text="Button Colors" FontSize="12" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,12"/>
+                            <TextBlock Text="Button Colors" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,12"/>
 
                             <StackPanel Margin="0,0,0,8">
-                                <TextBlock Text="Primary Button Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="AppPrimaryBtnColorInput" Height="32" Padding="8,4" Text="#3f7af8" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Primary Button Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="AppPrimaryBtnColorInput" Height="32" Padding="8,4" Text="#8067F2" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="AppPrimaryBtnColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,8">
-                                <TextBlock Text="Secondary Button Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="AppSecBtnColorInput" Height="32" Padding="8,4" Text="#e0e0e0" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Secondary Button Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="AppSecBtnColorInput" Height="32" Padding="8,4" Text="#343C6A" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="AppSecBtnColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
 
                             <StackPanel Margin="0,0,0,20">
-                                <TextBlock Text="Border Color" Foreground="#333" Margin="0,0,0,4" FontSize="11"/>
-                                <TextBox x:Name="AppBorderColorInput" Height="32" Padding="8,4" Text="#dde4f2" FontSize="12" VerticalContentAlignment="Center"/>
+                                <TextBlock Text="Border Color" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/>
+                                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="AppBorderColorInput" Height="32" Padding="8,4" Text="#414A7C" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="AppBorderColorInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid>
                             </StackPanel>
+
+                            <TextBlock Text="Task Cards and Checkboxes" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,12"/>
+                            <StackPanel Margin="0,0,0,8"><TextBlock Text="Task Card Background" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="TaskCardBgInput" Height="32" Padding="8,4" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="TaskCardBgInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid></StackPanel>
+                            <StackPanel Margin="0,0,0,8"><TextBlock Text="Task Title" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="TaskCardTextInput" Height="32" Padding="8,4" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="TaskCardTextInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid></StackPanel>
+                            <StackPanel Margin="0,0,0,8"><TextBlock Text="Task Subtitle" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="TaskCardSubtitleInput" Height="32" Padding="8,4" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="TaskCardSubtitleInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid></StackPanel>
+                            <StackPanel Margin="0,0,0,8"><TextBlock Text="Completed Task Text" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="CompletedTaskTextInput" Height="32" Padding="8,4" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="CompletedTaskTextInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid></StackPanel>
+                            <StackPanel Margin="0,0,0,8"><TextBlock Text="Task Card Border" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="TaskCardBorderInput" Height="32" Padding="8,4" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="TaskCardBorderInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid></StackPanel>
+                            <StackPanel Margin="0,0,0,20"><TextBlock Text="Checkbox Checkmark" Foreground="#39415C" Margin="0,0,0,4" FontSize="11"/><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions><TextBox x:Name="CheckboxAccentInput" Height="32" Padding="8,4" FontSize="12" VerticalContentAlignment="Center"/><Button Grid.Column="1" Content="Pick…" Tag="CheckboxAccentInput" Click="PickColor_Click" Margin="6,0,0,0" Padding="10,4"/></Grid></StackPanel>
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
@@ -132,14 +144,16 @@
                 <Grid Margin="15">
                     <ScrollViewer>
                         <StackPanel>
-                            <TextBlock Text="Font Sizes" FontSize="12" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,12"/>
+                            <TextBlock Text="Font Family" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,6"/>
+                            <TextBox x:Name="AppFontFamilyInput" Height="32" Padding="8,4" Text="Segoe UI" Margin="0,0,0,18"/>
+                            <TextBlock Text="Font Sizes" FontSize="12" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,12"/>
 
                             <Grid Margin="0,0,0,12">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Title Font Size" Foreground="#333" VerticalAlignment="Center"/>
+                                <TextBlock Text="Title Font Size" Foreground="#39415C" VerticalAlignment="Center"/>
                                 <Slider Grid.Column="0" x:Name="AppTitleSizeSlider" Minimum="18" Maximum="32" Value="24" SmallChange="1" LargeChange="2" Margin="100,0,0,0"/>
                                 <TextBlock Grid.Column="1" x:Name="AppTitleSizeValue" Text="24" Margin="10,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                             </Grid>
@@ -149,7 +163,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Heading Font Size" Foreground="#333" VerticalAlignment="Center"/>
+                                <TextBlock Text="Heading Font Size" Foreground="#39415C" VerticalAlignment="Center"/>
                                 <Slider Grid.Column="0" x:Name="AppHeadingSizeSlider" Minimum="11" Maximum="18" Value="14" SmallChange="1" LargeChange="1" Margin="100,0,0,0"/>
                                 <TextBlock Grid.Column="1" x:Name="AppHeadingSizeValue" Text="14" Margin="10,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                             </Grid>
@@ -159,7 +173,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Text Font Size" Foreground="#333" VerticalAlignment="Center"/>
+                                <TextBlock Text="Text Font Size" Foreground="#39415C" VerticalAlignment="Center"/>
                                 <Slider Grid.Column="0" x:Name="AppTextSizeSlider" Minimum="11" Maximum="18" Value="14" SmallChange="1" LargeChange="1" Margin="100,0,0,0"/>
                                 <TextBlock Grid.Column="1" x:Name="AppTextSizeValue" Text="14" Margin="10,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                             </Grid>
@@ -169,7 +183,7 @@
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="50"/>
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Text="Label Font Size" Foreground="#333" VerticalAlignment="Center"/>
+                                <TextBlock Text="Label Font Size" Foreground="#39415C" VerticalAlignment="Center"/>
                                 <Slider Grid.Column="0" x:Name="AppLabelSizeSlider" Minimum="9" Maximum="14" Value="12" SmallChange="1" LargeChange="1" Margin="100,0,0,0"/>
                                 <TextBlock Grid.Column="1" x:Name="AppLabelSizeValue" Text="12" Margin="10,0,0,0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                             </Grid>
@@ -179,10 +193,49 @@
             </TabItem>
         </TabControl>
 
+        <Border Grid.Row="2" Padding="10" Margin="0,0,0,10" Background="#ffffff" BorderBrush="#E2E7F0" BorderThickness="1" CornerRadius="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,8,0">
+                    <TextBlock Text="Live preview · task card" FontSize="11" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,6"/>
+                    <Border x:Name="PreviewTaskCard" Padding="8" CornerRadius="8" BorderThickness="1">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <Border x:Name="PreviewCheckbox" Width="15" Height="15" CornerRadius="3" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <TextBlock Text="✓" Foreground="White" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="PreviewTaskTitle" Text="Sample task" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="PreviewTaskSubtitle" Text="Subtitle preview" FontSize="11"/>
+                                <TextBlock x:Name="PreviewCompletedTask" Text="Completed task" FontSize="10" TextDecorations="Strikethrough"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                        <Button x:Name="PreviewPrimaryButton" Content="Primary" Padding="8,3" Margin="0,0,6,0"/>
+                        <Button x:Name="PreviewSecondaryButton" Content="Secondary" Padding="8,3"/>
+                    </StackPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                    <TextBlock Text="Live preview · widget" FontSize="11" FontWeight="SemiBold" Foreground="#697386" Margin="0,0,0,6"/>
+                    <Border x:Name="PreviewWidgetCard" Padding="10" CornerRadius="8" BorderThickness="1">
+                        <StackPanel>
+                            <TextBlock x:Name="PreviewWidgetTitle" Text="Sample task" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="PreviewWidgetSubtitle" Text="Widget text preview" FontSize="11"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Buttons -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button Content="Cancel" Width="80" Height="36" Padding="10,6" Click="Cancel_Click" Background="#e0e0e0" Foreground="#333" BorderThickness="0" Cursor="Hand" FontWeight="SemiBold"/>
-            <Button Content="Save" Width="80" Height="36" Padding="10,6" Click="Save_Click" Background="#3f7af8" Foreground="White" BorderThickness="0" Cursor="Hand" FontWeight="SemiBold" Margin="10,0,0,0"/>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Return to defaults" Width="145" Height="36" Padding="10,6" Click="ReturnToDefaults_Click" Background="#8067F2" Foreground="White" BorderThickness="0" Cursor="Hand" FontWeight="SemiBold"/>
+            <Button Content="Cancel" Width="80" Height="36" Padding="10,6" Click="Cancel_Click" Background="#EEF0F7" Foreground="#39415C" BorderThickness="0" Cursor="Hand" FontWeight="SemiBold" Margin="10,0,0,0"/>
+            <Button Content="Save" Width="80" Height="36" Padding="10,6" Click="Save_Click" Background="#8067F2" Foreground="White" BorderThickness="0" Cursor="Hand" FontWeight="SemiBold" Margin="10,0,0,0"/>
         </StackPanel>
     </Grid>
 </Window>

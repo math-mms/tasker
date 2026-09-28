@@ -3,6 +3,8 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
+using WpfPoint = System.Windows.Point;
 
 namespace Tasker;
 
@@ -11,8 +13,8 @@ public partial class ActiveTaskWidget : Window
     private bool _isDragging = false;
     private bool _mouseDown = false;
 
-    private Point _dragStartMouse;
-    private Point _windowStartPosition;
+    private WpfPoint _dragStartMouse;
+    private WpfPoint _windowStartPosition;
 
     private AppSettings _settings;
 
@@ -196,11 +198,11 @@ public partial class ActiveTaskWidget : Window
             _mouseDown = true;
             _isDragging = false;
 
-            _dragStartMouse = new Point(
+            _dragStartMouse = new WpfPoint(
                 mousePosition.X,
                 mousePosition.Y);
 
-            _windowStartPosition = new Point(
+            _windowStartPosition = new WpfPoint(
                 Left,
                 Top);
         });
@@ -211,13 +213,16 @@ public partial class ActiveTaskWidget : Window
         if (!_mouseDown)
             return;
 
-        Dispatcher.Invoke(() =>
+        Dispatcher.BeginInvoke(new Action(() =>
         {
-            double offsetX =
-                mousePosition.X - _dragStartMouse.X;
+            if (!_mouseDown)
+                return;
 
-            double offsetY =
-                mousePosition.Y - _dragStartMouse.Y;
+            var offset = ScreenDeltaToDip(
+                mousePosition.X - _dragStartMouse.X,
+                mousePosition.Y - _dragStartMouse.Y);
+            double offsetX = offset.X;
+            double offsetY = offset.Y;
 
             // Don't start dragging from a tiny accidental movement
             const double dragThreshold = 5;
@@ -238,7 +243,7 @@ public partial class ActiveTaskWidget : Window
 
             Left = _windowStartPosition.X + offsetX;
             Top = _windowStartPosition.Y + offsetY;
-        });
+        }));
     }
 
     private void HandleGlobalMouseUp()
@@ -270,10 +275,17 @@ public partial class ActiveTaskWidget : Window
 
     private bool IsMouseOverWidget(POINT point)
     {
-        return point.X >= Left &&
-               point.X <= Left + ActualWidth &&
-               point.Y >= Top &&
-               point.Y <= Top + ActualHeight;
+        var cursor = ScreenDeltaToDip(point.X, point.Y);
+        return cursor.X >= Left &&
+               cursor.X <= Left + ActualWidth &&
+               cursor.Y >= Top &&
+               cursor.Y <= Top + ActualHeight;
+    }
+
+    private WpfPoint ScreenDeltaToDip(double x, double y)
+    {
+        var transform = PresentationSource.FromVisual(this)?.CompositionTarget?.TransformFromDevice;
+        return transform?.Transform(new WpfPoint(x, y)) ?? new WpfPoint(x, y);
     }
 
     // -----------------------------
@@ -337,9 +349,25 @@ public partial class ActiveTaskWidget : Window
     public void ApplySettings(AppSettings settings)
     {
         _settings = settings;
-
+        try { FontFamily = new System.Windows.Media.FontFamily(settings.WidgetFontFamily); }
+        catch { FontFamily = new System.Windows.Media.FontFamily("Segoe UI"); }
         Left = settings.WidgetPositionX;
         Top = settings.WidgetPositionY;
+        Opacity = Math.Clamp(settings.WidgetOpacity, 0, 1);
+        WidgetBorder.MaxWidth = Math.Max(100, settings.WidgetMaxWidth);
+        WidgetBorder.Background = new System.Windows.Media.SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.WidgetBackgroundColor));
+        WidgetBorder.BorderBrush = new System.Windows.Media.SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.WidgetBorderColor));
+        WidgetTitleText.Foreground = new System.Windows.Media.SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.WidgetTitleColor));
+        WidgetTitleText.FontSize = settings.WidgetTitleFontSize;
+        WidgetSubtitleText.Foreground = new System.Windows.Media.SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.WidgetSubtitleColor));
+        WidgetSubtitleText.FontSize = settings.WidgetSubtitleFontSize;
+        WidgetDescriptionText.Foreground = new System.Windows.Media.SolidColorBrush(
+            (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(settings.WidgetDescriptionColor));
+        WidgetDescriptionText.FontSize = settings.WidgetDescriptionFontSize;
     }
     private void Border_PreviewMouseLeftButtonDown(
     object sender,
@@ -351,7 +379,7 @@ public partial class ActiveTaskWidget : Window
 
     private void Border_PreviewMouseMove(
         object sender,
-        MouseEventArgs e)
+    System.Windows.Input.MouseEventArgs e)
     {
         // O drag real é tratado pelo Windows mouse hook.
     }

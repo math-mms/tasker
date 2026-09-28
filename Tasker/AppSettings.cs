@@ -5,30 +5,45 @@ namespace Tasker;
 
 public class AppSettings
 {
+    public AppSettings Clone() => (AppSettings)MemberwiseClone();
+
+    public void CopyFrom(AppSettings source)
+    {
+        foreach (var property in typeof(AppSettings).GetProperties())
+            if (property.CanWrite)
+                property.SetValue(this, property.GetValue(source));
+    }
+
     // Widget Settings
     public double WidgetOpacity { get; set; } = 1.0;
     public int WidgetPositionX { get; set; } = 20;
     public int WidgetPositionY { get; set; } = 20;
-    public string WidgetTitleColor { get; set; } = "#FFFFFF";
-    public string WidgetSubtitleColor { get; set; } = "#DFEAFC";
-    public string WidgetDescriptionColor { get; set; } = "#DFEAFC";
+    public string WidgetTitleColor { get; set; } = "#F8F7FF";
+    public string WidgetSubtitleColor { get; set; } = "#BFC9F5";
+    public string WidgetDescriptionColor { get; set; } = "#BFC9F5";
     public int WidgetTitleFontSize { get; set; } = 16;
     public int WidgetSubtitleFontSize { get; set; } = 11;
     public int WidgetDescriptionFontSize { get; set; } = 12;
     public int WidgetMaxWidth { get; set; } = 300;
-    public string WidgetBackgroundColor { get; set; } = "#1f2b44";
-    public string WidgetBorderColor { get; set; } = "#dfeafc";
+    public string WidgetBackgroundColor { get; set; } = "#171A3B";
+    public string WidgetBorderColor { get; set; } = "#6157C8";
 
     // Application Colors
-    public string AppBackgroundColor { get; set; } = "#f4f6fb";
-    public string AppPanelColor { get; set; } = "#ffffff";
-    public string AppTextColor { get; set; } = "#1d2433";
-    public string AppSecondaryTextColor { get; set; } = "#5e6a81";
-    public string AppBorderColor { get; set; } = "#dde4f2";
-    public string AppPrimaryButtonColor { get; set; } = "#3f7af8";
+    public string AppBackgroundColor { get; set; } = "#11152E";
+    public string AppPanelColor { get; set; } = "#20264B";
+    public string AppTextColor { get; set; } = "#F4F5FF";
+    public string AppSecondaryTextColor { get; set; } = "#B7C0E8";
+    public string AppBorderColor { get; set; } = "#414A7C";
+    public string AppPrimaryButtonColor { get; set; } = "#8067F2";
     public string AppPrimaryButtonTextColor { get; set; } = "#ffffff";
-    public string AppSecondaryButtonColor { get; set; } = "#e0e0e0";
-    public string AppSecondaryButtonTextColor { get; set; } = "#333333";
+    public string AppSecondaryButtonColor { get; set; } = "#343C6A";
+    public string AppSecondaryButtonTextColor { get; set; } = "#E6E9FF";
+    public string AppTaskCardBackgroundColor { get; set; } = "#2A315D";
+    public string AppTaskCardTextColor { get; set; } = "";
+    public string AppTaskCardSubtitleColor { get; set; } = "";
+    public string AppCompletedTaskTextColor { get; set; } = "#A4AED6";
+    public string AppTaskCardBorderColor { get; set; } = "";
+    public string AppCheckboxAccentColor { get; set; } = "";
 
     // Application Fonts
     public int AppTitleFontSize { get; set; } = 24;
@@ -36,10 +51,12 @@ public class AppSettings
     public int AppLabelFontSize { get; set; } = 12;
     public int AppTextFontSize { get; set; } = 14;
     public int AppSmallTextFontSize { get; set; } = 11;
+    public string AppFontFamily { get; set; } = "Segoe UI";
+    public string WidgetFontFamily { get; set; } = "Segoe UI";
 
     // Theme
-    public string ThemePrimary { get; set; } = "#3f7af8";
-    public string ThemeSecondary { get; set; } = "#1d2433";
+    public string ThemePrimary { get; set; } = "#8067F2";
+    public string ThemeSecondary { get; set; } = "#171A3B";
 
     private static readonly string SettingsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

@@ -1,4 +1,4 @@
-﻿<Window x:Class="Tasker.MainWindow"
+<Window x:Class="Tasker.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,9 +6,91 @@
         xmlns:local="clr-namespace:Tasker"
         mc:Ignorable="d"
         Title="Tasker" Height="600" Width="1000"
+        Icon="Assets/tasker.ico"
         MinHeight="500" MinWidth="800"
         WindowStartupLocation="CenterScreen"
-        Background="#f4f6fb">
+        FontFamily="{DynamicResource AppFontFamily}"
+        Background="#11152E">
+    <Window.Resources>
+        <SolidColorBrush x:Key="AppBackgroundBrush" Color="#11152E"/>
+        <SolidColorBrush x:Key="AppPanelBrush" Color="#20264B"/>
+        <SolidColorBrush x:Key="AppTextBrush" Color="#F4F5FF"/>
+        <SolidColorBrush x:Key="AppSecondaryTextBrush" Color="#B7C0E8"/>
+        <SolidColorBrush x:Key="AppBorderBrush" Color="#414A7C"/>
+        <SolidColorBrush x:Key="AppPrimaryButtonBrush" Color="#8067F2"/>
+        <SolidColorBrush x:Key="AppSecondaryButtonBrush" Color="#343C6A"/>
+        <SolidColorBrush x:Key="AppTaskCardBrush" Color="#2A315D"/>
+        <SolidColorBrush x:Key="AppTaskCardTextBrush" Color="#F4F5FF"/>
+        <SolidColorBrush x:Key="AppTaskCardSubtitleBrush" Color="#B7C0E8"/>
+        <SolidColorBrush x:Key="AppCompletedTaskTextBrush" Color="#A4AED6"/>
+        <SolidColorBrush x:Key="AppTaskCardBorderBrush" Color="#414A7C"/>
+        <SolidColorBrush x:Key="AppCheckboxAccentBrush" Color="#8067F2"/>
+        <FontFamily x:Key="AppFontFamily">Segoe UI</FontFamily>
+        <sys:Double x:Key="AppTitleSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">24</sys:Double>
+        <sys:Double x:Key="AppHeadingSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">14</sys:Double>
+        <sys:Double x:Key="AppTextSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">14</sys:Double>
+        <sys:Double x:Key="AppLabelSize" xmlns:sys="clr-namespace:System;assembly=mscorlib">12</sys:Double>
+        <Style x:Key="TaskCheckboxStyle" TargetType="{x:Type CheckBox}">
+            <Setter Property="Width" Value="18"/>
+            <Setter Property="Height" Value="18"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type CheckBox}">
+                        <Grid Width="18" Height="18" Background="Transparent">
+                            <Border x:Name="CheckboxChrome" CornerRadius="3" BorderThickness="1"
+                                    BorderBrush="{DynamicResource AppTaskCardBorderBrush}"
+                                    Background="{DynamicResource AppPanelBrush}"/>
+                            <Path x:Name="CheckboxMark" Data="M 3,9 L 7,13 L 15,4" Stroke="White"
+                                  StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                  Visibility="Collapsed"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckboxChrome" Property="Background" Value="{DynamicResource AppCheckboxAccentBrush}"/>
+                                <Setter TargetName="CheckboxChrome" Property="BorderBrush" Value="{DynamicResource AppCheckboxAccentBrush}"/>
+                                <Setter TargetName="CheckboxMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CheckboxChrome" Property="BorderBrush" Value="{DynamicResource AppCheckboxAccentBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="CheckboxChrome" Property="Opacity" Value="0.55"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonChrome" Background="{TemplateBinding Background}"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.72"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonChrome" Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1*" MinWidth="300"/>
@@ -16,20 +98,23 @@
         </Grid.ColumnDefinitions>
 
         <!-- Left Panel: Tasks List -->
-        <Border Grid.Column="0" Background="#ffffff" Margin="16" CornerRadius="18" BorderBrush="#dde4f2" BorderThickness="1">
+        <Border x:Name="TaskListPanel" Grid.Column="0" Background="{DynamicResource AppPanelBrush}" Margin="16" CornerRadius="20" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1">
             <DockPanel>
-                <Grid DockPanel.Dock="Top" Margin="20,18,20,10">
+                <Grid DockPanel.Dock="Top" Margin="22,20,22,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Tasks" FontSize="24" FontWeight="Bold" Foreground="#1d2433" VerticalAlignment="Center"/>
-                    <Button Grid.Column="2" x:Name="SettingsButton" Content="⚙️ Customize" Padding="10,6" Click="Settings_Click" Background="#e8ecff" Foreground="#3247ae" BorderThickness="0" Cursor="Hand" FontWeight="SemiBold" FontSize="11"/>
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                        <TextBlock Text="Your tasks" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}"/>
+                        <TextBlock Text="A little progress, every day." FontSize="{DynamicResource AppLabelSize}" Foreground="{DynamicResource AppSecondaryTextBrush}" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="2" x:Name="SettingsButton" Content="⚙  Customize" Padding="12,8" Click="Settings_Click" Background="{DynamicResource AppSecondaryButtonBrush}" Foreground="{DynamicResource AppTextBrush}" FontWeight="SemiBold" FontSize="{DynamicResource AppLabelSize}"/>
                 </Grid>
 
                 <!-- Collapsible Add Task Section -->
-                <Border x:Name="AddTaskSection" DockPanel.Dock="Top" Margin="12,0,12,10" Background="#eef4ff" CornerRadius="12" Padding="12" Visibility="Collapsed">
+                <Border x:Name="AddTaskSection" DockPanel.Dock="Top" Margin="12,0,12,10" Background="{DynamicResource AppPanelBrush}" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" CornerRadius="12" Padding="12" Visibility="Collapsed">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -42,33 +127,31 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="New Task" FontSize="14" FontWeight="Bold" Foreground="#1d2433" Margin="0,0,0,10"/>
+                        <TextBlock Text="New Task" FontSize="{DynamicResource AppHeadingSize}" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}" Margin="0,0,0,10"/>
                         
-                        <TextBlock Grid.Row="1" Text="Title *" FontSize="11" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,3"/>
-                        <TextBox x:Name="TodoTitleInput" Grid.Row="2" Height="32" Margin="0,0,0,8" Padding="8,4" FontSize="14" VerticalContentAlignment="Center" Text="" />
+                        <TextBlock Grid.Row="1" Text="Title *" FontSize="{DynamicResource AppLabelSize}" FontWeight="SemiBold" Foreground="{DynamicResource AppSecondaryTextBrush}" Margin="0,0,0,3"/>
+                        <TextBox x:Name="TodoTitleInput" Grid.Row="2" Height="32" Margin="0,0,0,8" Padding="8,4" FontSize="{DynamicResource AppTextSize}" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppPanelBrush}" BorderBrush="{DynamicResource AppBorderBrush}" VerticalContentAlignment="Center" Text="" />
                         
-                        <TextBlock Grid.Row="3" Text="Subtitle (optional)" FontSize="11" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,3"/>
-                        <TextBox x:Name="TodoSubtitleInput" Grid.Row="4" Height="28" Margin="0,0,0,8" Padding="8,4" FontSize="12" VerticalContentAlignment="Center" Text="" />
+                        <TextBlock Grid.Row="3" Text="Subtitle (optional)" FontSize="{DynamicResource AppLabelSize}" FontWeight="SemiBold" Foreground="{DynamicResource AppSecondaryTextBrush}" Margin="0,0,0,3"/>
+                        <TextBox x:Name="TodoSubtitleInput" Grid.Row="4" Height="28" Margin="0,0,0,8" Padding="8,4" FontSize="{DynamicResource AppLabelSize}" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppPanelBrush}" BorderBrush="{DynamicResource AppBorderBrush}" VerticalContentAlignment="Center" Text="" />
                         
-                        <TextBlock Grid.Row="5" Text="Description (optional)" FontSize="11" FontWeight="SemiBold" Foreground="#5e6a81" Margin="0,0,0,3"/>
-                        <TextBox x:Name="TodoDescriptionInput" Grid.Row="6" Height="64" Margin="0,0,0,8" Padding="8,6" FontSize="14" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                        <TextBlock Grid.Row="5" Text="Description (optional)" FontSize="{DynamicResource AppLabelSize}" FontWeight="SemiBold" Foreground="{DynamicResource AppSecondaryTextBrush}" Margin="0,0,0,3"/>
+                        <TextBox x:Name="TodoDescriptionInput" Grid.Row="6" Height="64" Margin="0,0,0,8" Padding="8,6" FontSize="{DynamicResource AppTextSize}" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppPanelBrush}" BorderBrush="{DynamicResource AppBorderBrush}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
                         
                         <Grid Grid.Row="7">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <Button Content="Add task" Height="34" FontWeight="SemiBold" Click="AddTaskButton_Click" Background="#3f7af8" Foreground="White" BorderThickness="0" Cursor="Hand" />
-                            <Button Grid.Column="1" Content="Cancel" Height="34" Margin="8,0,0,0" FontWeight="SemiBold" Click="CancelAddTask_Click" Background="#e0e0e0" Foreground="#333" BorderThickness="0" Cursor="Hand"/>
+                            <Button x:Name="AddTaskActionButton" Content="Add task" Height="34" FontWeight="SemiBold" Click="AddTaskButton_Click" Background="{DynamicResource AppPrimaryButtonBrush}" Foreground="White" BorderThickness="0" Cursor="Hand" />
+                            <Button x:Name="CancelAddTaskButton" Grid.Column="1" Content="Cancel" Height="34" Margin="8,0,0,0" FontWeight="SemiBold" Click="CancelAddTask_Click" Background="{DynamicResource AppSecondaryButtonBrush}" Foreground="{DynamicResource AppTextBrush}" BorderThickness="0" Cursor="Hand"/>
                         </Grid>
                     </Grid>
                 </Border>
 
                 <!-- Add task button -->
-                <Border HorizontalAlignment="Center" Margin="16" DockPanel.Dock="bottom" CornerRadius="15"  Background="#3f7af8">
-                    <StackPanel>
-                            <Button x:Name="FloatingAddButton" Content="➕" Height="44" Width="150"  FontWeight="Bold" FontSize="13" Click="OpenAddTask_Click" Background="Transparent"  Foreground="White" BorderThickness="0" Cursor="Hand"/>
-                    </StackPanel>
+                <Border x:Name="FloatingAddButtonBorder" HorizontalAlignment="Center" Margin="16,12,16,18" DockPanel.Dock="bottom" CornerRadius="12" Background="{DynamicResource AppPrimaryButtonBrush}">
+                    <Button x:Name="FloatingAddButton" Content="＋   Add a task" Height="46" Width="176" FontWeight="SemiBold" FontSize="14" Click="OpenAddTask_Click" Background="{DynamicResource AppPrimaryButtonBrush}" Foreground="White"/>
                 </Border>
 
                 <!-- Tasks List -->
@@ -79,32 +162,88 @@
                          HorizontalContentAlignment="Stretch"
                          SelectionChanged="TodoListBox_SelectionChanged"
                          PreviewMouseLeftButtonDown="TodoListBox_PreviewMouseLeftButtonDown">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <ContentPresenter/>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name, Converter={StaticResource TaskGroupNameConverter}}"
+                                               FontSize="{DynamicResource AppHeadingSize}"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource AppSecondaryTextBrush}"
+                                               Margin="4,12,4,4"/>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ListBox.GroupStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Margin="0,4" Padding="12,10" CornerRadius="12" Background="#eef4ff">
+                            <Border Margin="0,5" Padding="14,12" CornerRadius="14" BorderThickness="1">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{DynamicResource AppTaskCardBrush}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource AppTaskCardBorderBrush}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AppCheckboxAccentBrush}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                <Setter Property="BorderBrush" Value="{DynamicResource AppCheckboxAccentBrush}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <CheckBox IsChecked="{Binding IsCompleted, Mode=TwoWay}" VerticalAlignment="Center" Margin="0,0,10,0" Focusable="False"/>
+                                    <CheckBox IsChecked="{Binding IsCompleted, Mode=TwoWay}" Click="TaskCheckbox_Click" VerticalAlignment="Center" Margin="0,0,10,0" Focusable="False" Style="{StaticResource TaskCheckboxStyle}"/>
 
                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Title}" FontSize="15" FontWeight="SemiBold" Foreground="#19212d">
+                                        <TextBlock Text="{Binding Title}" FontSize="{DynamicResource AppTextSize}" FontWeight="SemiBold">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppTaskCardTextBrush}"/>
+                                                    <Setter Property="FontSize" Value="{DynamicResource AppTextSize}"/>
                                                     <Setter Property="TextDecorations" Value="None"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsCompleted}" Value="True">
                                                             <Setter Property="TextDecorations" Value="Strikethrough"/>
-                                                            <Setter Property="Foreground" Value="#6b7280"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppCompletedTaskTextBrush}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
-                                        <TextBlock Text="{Binding Subtitle}" FontSize="11" Foreground="#64748b" Margin="0,2,0,0" Visibility="{Binding Subtitle, Converter={StaticResource StringToVisibilityConverter}}"/>
+                                        <TextBlock Text="{Binding Subtitle}" FontSize="{DynamicResource AppLabelSize}" Margin="0,2,0,0" Visibility="{Binding Subtitle, Converter={StaticResource StringToVisibilityConverter}}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource AppTaskCardSubtitleBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsCompleted}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource AppCompletedTaskTextBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </StackPanel>
                                 </Grid>
                             </Border>
@@ -117,8 +256,8 @@
 
         <!-- Right Panel: Task Details -->
         <Grid Grid.Column="1" Margin="0,16,16,16">
-            <Border x:Name="DetailPanel" Background="#f9fbff" CornerRadius="18" BorderBrush="#dde4f2" BorderThickness="1" Visibility="Visible">
-                <Grid Margin="24">
+            <Border x:Name="DetailPanel" Background="{DynamicResource AppPanelBrush}" CornerRadius="20" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Visibility="Visible">
+                <Grid Margin="28">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -128,15 +267,15 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBlock x:Name="SelectedTitleText" Text="Select a task" FontSize="28" FontWeight="Bold" Foreground="#1d2433"/>
+                        <TextBlock x:Name="SelectedTitleText" Text="Select a task" FontSize="{DynamicResource AppTitleSize}" FontWeight="Bold" Foreground="{DynamicResource AppTextBrush}"/>
                         <TextBlock x:Name="CompletionMarker" Text="✓" FontSize="22" Foreground="#1bbd7c" Margin="10,4,0,0" Visibility="Collapsed"/>
                     </StackPanel>
 
-                    <TextBlock x:Name="SelectedSubtitleText" Text="" FontSize="13" Foreground="#64748b" Grid.Row="1" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"/>
+                    <TextBlock x:Name="SelectedSubtitleText" Text="" FontSize="{DynamicResource AppLabelSize}" Foreground="{DynamicResource AppSecondaryTextBrush}" Grid.Row="1" Margin="0,0,0,12" TextWrapping="Wrap" Visibility="Collapsed"/>
 
                     <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,16" VerticalAlignment="Center">
-                        <Button x:Name="ToggleCompleteButton" Content="Mark as complete" Margin="0,0,0,0" Padding="10,6" Click="ToggleCompleteButton_Click" Background="#e9f7ef" Foreground="#136a46" BorderThickness="0" Cursor="Hand"/>
-                        <Button x:Name="EditTaskButton" Content="Edit" Margin="10,0,0,0" Padding="10,6" Click="EditTaskButton_Click" Background="#e8ecff" Foreground="#3247ae" BorderThickness="0" Cursor="Hand"/>
+                        <Button x:Name="ToggleCompleteButton" Content="✓  Mark as complete" Margin="0,0,0,0" Padding="14,9" Click="ToggleCompleteButton_Click" Background="{DynamicResource AppPrimaryButtonBrush}" Foreground="White" FontWeight="SemiBold"/>
+                        <Button x:Name="EditTaskButton" Content="Edit task" Margin="10,0,0,0" Padding="14,9" Click="EditTaskButton_Click" Background="{DynamicResource AppSecondaryButtonBrush}" Foreground="{DynamicResource AppTextBrush}" FontWeight="SemiBold"/>
                     </StackPanel>
 
                     <Grid x:Name="EditTaskGrid" Grid.Row="3" Margin="0,0,0,16" Visibility="Collapsed">
@@ -151,28 +290,28 @@
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
-                        <TextBox x:Name="DetailTitleInput" Grid.ColumnSpan="3" Height="32" Margin="0,0,0,10" Padding="8,4" FontSize="14" VerticalContentAlignment="Center"/>
-                        <TextBox x:Name="DetailSubtitleInput" Grid.Row="1" Grid.ColumnSpan="3" Height="28" Margin="0,0,0,10" Padding="8,4" FontSize="12" VerticalContentAlignment="Center"/>
-                        <TextBox x:Name="DetailDescriptionInput" Grid.Row="2" Grid.ColumnSpan="3" MinHeight="120" Padding="8,6" FontSize="14" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
-                        <Button Grid.Row="3" Grid.Column="1" Content="Save changes" Margin="0,10,8,0" Padding="12,8" Click="SaveSelectedTaskButton_Click" Background="#3f7af8" Foreground="White" BorderThickness="0" Cursor="Hand"/>
-                        <Button Grid.Row="3" Grid.Column="2" Content="Delete" Margin="0,10,0,0" Padding="12,8" Click="DeleteSelectedTaskButton_Click" Background="#f8d7da" Foreground="#7f1d1d" BorderThickness="0" Cursor="Hand"/>
+                        <TextBox x:Name="DetailTitleInput" Grid.ColumnSpan="3" Height="32" Margin="0,0,0,10" Padding="8,4" FontSize="{DynamicResource AppTextSize}" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppPanelBrush}" BorderBrush="{DynamicResource AppBorderBrush}" VerticalContentAlignment="Center"/>
+                        <TextBox x:Name="DetailSubtitleInput" Grid.Row="1" Grid.ColumnSpan="3" Height="28" Margin="0,0,0,10" Padding="8,4" FontSize="{DynamicResource AppLabelSize}" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppPanelBrush}" BorderBrush="{DynamicResource AppBorderBrush}" VerticalContentAlignment="Center"/>
+                        <TextBox x:Name="DetailDescriptionInput" Grid.Row="2" Grid.ColumnSpan="3" MinHeight="120" Padding="8,6" FontSize="{DynamicResource AppTextSize}" Foreground="{DynamicResource AppTextBrush}" Background="{DynamicResource AppPanelBrush}" BorderBrush="{DynamicResource AppBorderBrush}" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                        <Button x:Name="SaveTaskButton" Grid.Row="3" Grid.Column="1" Content="Save changes" Margin="0,10,8,0" Padding="12,8" Click="SaveSelectedTaskButton_Click" Background="{DynamicResource AppPrimaryButtonBrush}" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                        <Button x:Name="DeleteTaskButton" Grid.Row="3" Grid.Column="2" Content="Delete" Margin="0,10,0,0" Padding="12,8" Click="DeleteSelectedTaskButton_Click" Background="{DynamicResource AppSecondaryButtonBrush}" Foreground="#7f1d1d" BorderThickness="0" Cursor="Hand"/>
                     </Grid>
 
-                    <Border Grid.Row="4" Background="#ffffff" CornerRadius="16" BorderBrush="#e1e7f3" BorderThickness="1" Padding="20">
+                    <Border Grid.Row="4" Background="{DynamicResource AppBackgroundBrush}" CornerRadius="16" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Padding="24">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <TextBlock x:Name="SelectedDescriptionText"
                                        Text="Choose an item from the list to view its full description here."
                                        TextWrapping="Wrap"
-                                       FontSize="17"
+                                       FontSize="{DynamicResource AppTextSize}"
                                        LineHeight="28"
-                                       Foreground="#2b3547"/>
+                                       Foreground="{DynamicResource AppTextBrush}"/>
                         </ScrollViewer>
                     </Border>
                 </Grid>
             </Border>
 
-            <Border x:Name="EmptyDetailPanel" Background="#f9fbff" CornerRadius="18" BorderBrush="#dde4f2" BorderThickness="1" Visibility="Collapsed">
-                <TextBlock Text="Select a task to read its description here." FontSize="20" Foreground="#6b7280" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Border x:Name="EmptyDetailPanel" Background="{DynamicResource AppPanelBrush}" CornerRadius="18" BorderBrush="{DynamicResource AppBorderBrush}" BorderThickness="1" Visibility="Collapsed">
+                <TextBlock Text="Select a task to read its description here." FontSize="{DynamicResource AppTextSize}" Foreground="{DynamicResource AppSecondaryTextBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
         </Grid>
     </Grid>

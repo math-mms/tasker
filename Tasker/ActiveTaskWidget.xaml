@@ -12,9 +12,9 @@
         Left="20" Top="20">
     <Border x:Name="WidgetBorder"
             Padding="14,10"
-            Background="#1f2b44"
+            Background="#171A3B"
             CornerRadius="14"
-            BorderBrush="#dfeafc"
+            BorderBrush="#6157C8"
             BorderThickness="1"
             MaxWidth="300"
             PreviewMouseLeftButtonDown="Border_PreviewMouseLeftButtonDown"
@@ -22,8 +22,8 @@
             PreviewMouseLeftButtonUp="Border_PreviewMouseLeftButtonUp">
         <StackPanel Background="Transparent">
             <TextBlock x:Name="WidgetTitleText" Text="No active task" FontSize="16" FontWeight="SemiBold" Foreground="White" TextWrapping="Wrap" Margin="0,0,0,8"/>
-            <TextBlock x:Name="WidgetSubtitleText" Text="" FontSize="11" Foreground="#dfeafc" Margin="0,0,0,6" TextWrapping="Wrap" Visibility="Collapsed"/>
-            <TextBlock x:Name="WidgetDescriptionText" Text="" FontSize="12" Foreground="#dfeafc" Margin="0,0,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>
+            <TextBlock x:Name="WidgetSubtitleText" Text="" FontSize="11" Foreground="#BFC9F5" Margin="0,0,0,6" TextWrapping="Wrap" Visibility="Collapsed"/>
+            <TextBlock x:Name="WidgetDescriptionText" Text="" FontSize="12" Foreground="#BFC9F5" Margin="0,0,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>
         </StackPanel>
     </Border>
 </Window>

@@ -1,21 +1,55 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Data;
+using System.Windows.Threading;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
+using Microsoft.Win32;
+using Forms = System.Windows.Forms;
+using Brush = System.Windows.Media.Brush;
+using Color = System.Windows.Media.Color;
+using ColorConverter = System.Windows.Media.ColorConverter;
+using MessageBox = System.Windows.MessageBox;
+using CheckBox = System.Windows.Controls.CheckBox;
+using WpfPoint = System.Windows.Point;
 
 namespace Tasker;
 
 public partial class MainWindow : Window
 {
     private readonly ObservableCollection<TodoItem> _todos;
+    private readonly ICollectionView _todoView;
+    private bool _usesLiveGrouping;
     private ActiveTaskWidget? _activeTaskWidget;
     private AppSettings _settings;
+    private Forms.NotifyIcon? _trayIcon;
+    private System.Drawing.Icon? _applicationIcon;
+    private HwndSource? _windowSource;
+    private bool _exitRequested;
+
+    private const int WmSettingChange = 0x001A;
+    private const int WmThemeChanged = 0x031A;
+    private const int DwmwaUseImmersiveDarkMode = 20;
+    private const int DwmwaUseImmersiveDarkModeLegacy = 19;
 
     public MainWindow()
     {
         InitializeComponent();
+        InitializeTrayIcon();
+        SourceInitialized += MainWindow_SourceInitialized;
+        Closing += MainWindow_Closing;
+        Closed += (_, _) =>
+        {
+            _windowSource?.RemoveHook(WindowMessageHook);
+            _trayIcon?.Dispose();
+            _applicationIcon?.Dispose();
+        };
         
         // Load settings
         _settings = AppSettings.Load();
@@ -27,7 +61,18 @@ public partial class MainWindow : Window
         _activeTaskWidget = new ActiveTaskWidget(_settings);
 
         _todos = new ObservableCollection<TodoItem>(TodoStorage.Load());
-        TodoListBox.ItemsSource = _todos;
+        _todoView = CollectionViewSource.GetDefaultView(_todos);
+        var completionGrouping = new PropertyGroupDescription(nameof(TodoItem.IsCompleted));
+        completionGrouping.GroupNames.Add(false);
+        completionGrouping.GroupNames.Add(true);
+        _todoView.GroupDescriptions!.Add(completionGrouping);
+        if (_todoView is ICollectionViewLiveShaping liveShaping && liveShaping.CanChangeLiveGrouping)
+        {
+            liveShaping.LiveGroupingProperties.Add(nameof(TodoItem.IsCompleted));
+            liveShaping.IsLiveGrouping = true;
+            _usesLiveGrouping = true;
+        }
+        TodoListBox.ItemsSource = _todoView;
 
         if (_todos.Count == 0)
         {
@@ -104,6 +149,9 @@ public partial class MainWindow : Window
     private void TodoListBox_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         var source = e.OriginalSource as DependencyObject;
+        if (FindAncestor<CheckBox>(source) is not null)
+            return;
+
         var listItem = FindAncestor<ListBoxItem>(source);
 
         if (listItem is null || TodoListBox.SelectedItem is not TodoItem selectedItem)
@@ -126,8 +174,65 @@ public partial class MainWindow : Window
         }
 
         selectedItem.IsCompleted = !selectedItem.IsCompleted;
+        RefreshTodoGroups();
+        if (!ReferenceEquals(TodoListBox.SelectedItem, selectedItem))
+            TodoListBox.SelectedItem = selectedItem;
         TodoStorage.Save(_todos);
         ShowDetail(selectedItem);
+        if (selectedItem.IsCompleted)
+            AnimateTaskCompletion(selectedItem);
+    }
+
+    private void TaskCheckbox_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox { DataContext: TodoItem item })
+            return;
+
+        bool wasSelected = ReferenceEquals(TodoListBox.SelectedItem, item);
+        RefreshTodoGroups();
+        TodoStorage.Save(_todos);
+        if (wasSelected)
+        {
+            if (!ReferenceEquals(TodoListBox.SelectedItem, item))
+                TodoListBox.SelectedItem = item;
+            ShowDetail(item);
+        }
+        if (item.IsCompleted)
+            AnimateTaskCompletion(item);
+    }
+
+    private void RefreshTodoGroups()
+    {
+        if (!_usesLiveGrouping)
+            _todoView.Refresh();
+    }
+
+    private void AnimateTaskCompletion(TodoItem item)
+    {
+        Dispatcher.BeginInvoke(new Action(() =>
+        {
+            var container = FindVisualChildren<ListBoxItem>(TodoListBox)
+                .FirstOrDefault(candidate => ReferenceEquals(candidate.DataContext, item));
+            var card = container is null ? null : FindVisualChildren<Border>(container).FirstOrDefault();
+            if (card is null)
+                return;
+
+            card.RenderTransformOrigin = new WpfPoint(0.5, 0.5);
+            var pulse = new System.Windows.Media.ScaleTransform(1, 1);
+            card.RenderTransform = pulse;
+            var animation = new DoubleAnimation(1, 1.045, TimeSpan.FromMilliseconds(150))
+            {
+                AutoReverse = true,
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            };
+            pulse.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleXProperty, animation);
+            pulse.BeginAnimation(System.Windows.Media.ScaleTransform.ScaleYProperty, animation);
+            card.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(1, 0.72, TimeSpan.FromMilliseconds(150))
+            {
+                AutoReverse = true,
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
+            });
+        }), DispatcherPriority.Loaded);
     }
 
     private void EditTaskButton_Click(object sender, RoutedEventArgs e)
@@ -263,22 +368,11 @@ public partial class MainWindow : Window
             Owner = this
         };
 
+        settingsWindow.SettingsChanged += ApplySettings;
+
         if (settingsWindow.ShowDialog() == true)
         {
-            // Apply appearance settings to main window
-            ApplyAppearanceSettings();
-            
-            // Update the active task widget with new settings
-            if (_activeTaskWidget != null)
-            {
-                _activeTaskWidget.ApplySettings(_settings);
-                
-                // If there's a selected task, refresh the widget display
-                if (TodoListBox.SelectedItem is TodoItem selectedItem)
-                {
-                    _activeTaskWidget.ShowTask(selectedItem);
-                }
-            }
+            ApplySettings();
         }
     }
 
@@ -286,37 +380,148 @@ public partial class MainWindow : Window
     {
         try
         {
-            // Apply window and panel colors
-            Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_settings.AppBackgroundColor));
-            
-            // Find all borders and apply panel color
-            foreach (var border in FindVisualChildren<Border>(this))
-            {
-                if (border.Name == "AddTaskSection" || border.Background != null)
-                    border.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_settings.AppPanelColor));
-                border.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_settings.AppBorderColor));
-            }
+            Resources["AppBackgroundBrush"] = CreateBrush(_settings.AppBackgroundColor);
+            Resources["AppPanelBrush"] = CreateBrush(_settings.AppPanelColor);
+            Resources["AppTextBrush"] = CreateBrush(_settings.AppTextColor);
+            Resources["AppSecondaryTextBrush"] = CreateBrush(_settings.AppSecondaryTextColor);
+            Resources["AppBorderBrush"] = CreateBrush(_settings.AppBorderColor);
+            Resources["AppPrimaryButtonBrush"] = CreateBrush(_settings.AppPrimaryButtonColor);
+            Resources["AppSecondaryButtonBrush"] = CreateBrush(_settings.AppSecondaryButtonColor);
+            Resources["AppTaskCardBrush"] = CreateBrush(string.IsNullOrWhiteSpace(_settings.AppTaskCardBackgroundColor) ? _settings.AppPanelColor : _settings.AppTaskCardBackgroundColor);
+            Resources["AppTaskCardTextBrush"] = CreateBrush(string.IsNullOrWhiteSpace(_settings.AppTaskCardTextColor) ? _settings.AppTextColor : _settings.AppTaskCardTextColor);
+            Resources["AppTaskCardSubtitleBrush"] = CreateBrush(string.IsNullOrWhiteSpace(_settings.AppTaskCardSubtitleColor) ? _settings.AppSecondaryTextColor : _settings.AppTaskCardSubtitleColor);
+            Resources["AppCompletedTaskTextBrush"] = CreateBrush(_settings.AppCompletedTaskTextColor);
+            Resources["AppTaskCardBorderBrush"] = CreateBrush(string.IsNullOrWhiteSpace(_settings.AppTaskCardBorderColor) ? _settings.AppBorderColor : _settings.AppTaskCardBorderColor);
+            Resources["AppCheckboxAccentBrush"] = CreateBrush(string.IsNullOrWhiteSpace(_settings.AppCheckboxAccentColor) ? _settings.AppPrimaryButtonColor : _settings.AppCheckboxAccentColor);
+            Resources["AppFontFamily"] = CreateFontFamily(_settings.AppFontFamily);
+            Resources["AppTitleSize"] = (double)_settings.AppTitleFontSize;
+            Resources["AppHeadingSize"] = (double)_settings.AppHeadingFontSize;
+            Resources["AppTextSize"] = (double)_settings.AppTextFontSize;
+            Resources["AppLabelSize"] = (double)_settings.AppLabelFontSize;
 
-            // Apply text colors to TextBlocks
-            foreach (var textBlock in FindVisualChildren<TextBlock>(this))
-            {
-                if (!textBlock.Foreground.ToString().Contains("#dfeafc") && !textBlock.Foreground.ToString().Contains("#5e6a81"))
-                    textBlock.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_settings.AppTextColor));
-            }
+            Background = (Brush)Resources["AppBackgroundBrush"];
+            TaskListPanel.Background = (Brush)Resources["AppPanelBrush"];
+            DetailPanel.Background = (Brush)Resources["AppPanelBrush"];
+            EmptyDetailPanel.Background = (Brush)Resources["AppPanelBrush"];
+            AddTaskSection.Background = (Brush)Resources["AppPanelBrush"];
+            TaskListPanel.BorderBrush = (Brush)Resources["AppBorderBrush"];
+            DetailPanel.BorderBrush = (Brush)Resources["AppBorderBrush"];
+            EmptyDetailPanel.BorderBrush = (Brush)Resources["AppBorderBrush"];
+            FloatingAddButtonBorder.Background = (Brush)Resources["AppPrimaryButtonBrush"];
 
-            // Apply button colors
-            foreach (var button in FindVisualChildren<Button>(this))
-            {
-                if (button.Background.ToString().Contains("3f7af8"))
-                    button.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_settings.AppPrimaryButtonColor));
-                else if (button.Background.ToString().Contains("e0e0e0"))
-                    button.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString(_settings.AppSecondaryButtonColor));
-            }
+            SettingsButton.Background = (Brush)Resources["AppSecondaryButtonBrush"];
+            AddTaskActionButton.Background = (Brush)Resources["AppPrimaryButtonBrush"];
+            CancelAddTaskButton.Background = (Brush)Resources["AppSecondaryButtonBrush"];
+            ToggleCompleteButton.Background = (Brush)Resources["AppSecondaryButtonBrush"];
+            EditTaskButton.Background = (Brush)Resources["AppSecondaryButtonBrush"];
+            SaveTaskButton.Background = (Brush)Resources["AppPrimaryButtonBrush"];
+            DeleteTaskButton.Background = (Brush)Resources["AppSecondaryButtonBrush"];
         }
         catch
         {
             // Silently fail if color application fails
         }
+    }
+
+    private static SolidColorBrush CreateBrush(string color) =>
+        new((Color)ColorConverter.ConvertFromString(color));
+
+    private static System.Windows.Media.FontFamily CreateFontFamily(string familyName)
+    {
+        try { return new System.Windows.Media.FontFamily(familyName); }
+        catch { return new System.Windows.Media.FontFamily("Segoe UI"); }
+    }
+
+    private void InitializeTrayIcon()
+    {
+        var menu = new Forms.ContextMenuStrip();
+        menu.Items.Add("Open Tasker", null, (_, _) => RestoreFromTray());
+        menu.Items.Add("Exit", null, (_, _) => Dispatcher.Invoke(() =>
+        {
+            _exitRequested = true;
+            Close();
+        }));
+
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "tasker.ico");
+        _applicationIcon = File.Exists(iconPath)
+            ? new System.Drawing.Icon(iconPath)
+            : (System.Drawing.Icon)System.Drawing.SystemIcons.Application.Clone();
+
+        _trayIcon = new Forms.NotifyIcon
+        {
+            Text = "Tasker",
+            Icon = _applicationIcon,
+            ContextMenuStrip = menu,
+            Visible = true
+        };
+        _trayIcon.DoubleClick += (_, _) => RestoreFromTray();
+    }
+
+    private void MainWindow_SourceInitialized(object? sender, EventArgs e)
+    {
+        var handle = new WindowInteropHelper(this).Handle;
+        _windowSource = HwndSource.FromHwnd(handle);
+        _windowSource?.AddHook(WindowMessageHook);
+        ApplyWindowsTitleBarTheme(handle);
+    }
+
+    private IntPtr WindowMessageHook(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (message == WmSettingChange || message == WmThemeChanged)
+            Dispatcher.BeginInvoke(() => ApplyWindowsTitleBarTheme(hwnd));
+
+        return IntPtr.Zero;
+    }
+
+    private static void ApplyWindowsTitleBarTheme(IntPtr hwnd)
+    {
+        try
+        {
+            using var personalization = Registry.CurrentUser.OpenSubKey(
+                @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+            var themeValue = personalization?.GetValue("AppsUseLightTheme")
+                ?? personalization?.GetValue("SystemUsesLightTheme");
+            var useDarkTitleBar = themeValue is int lightTheme && lightTheme == 0 ? 1 : 0;
+
+            var result = DwmSetWindowAttribute(hwnd, DwmwaUseImmersiveDarkMode,
+                ref useDarkTitleBar, sizeof(int));
+            if (result != 0)
+                DwmSetWindowAttribute(hwnd, DwmwaUseImmersiveDarkModeLegacy,
+                    ref useDarkTitleBar, sizeof(int));
+        }
+        catch
+        {
+            // Keep the standard Windows title bar if theme detection is unavailable.
+        }
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute,
+        ref int attributeValue, int attributeSize);
+
+    private void MainWindow_Closing(object? sender, System.ComponentModel.CancelEventArgs e)
+    {
+        if (_exitRequested)
+            return;
+
+        e.Cancel = true;
+        Hide();
+    }
+
+    private void RestoreFromTray()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            Show();
+            WindowState = WindowState.Normal;
+            Activate();
+        });
+    }
+
+    private void ApplySettings()
+    {
+        ApplyAppearanceSettings();
+        _activeTaskWidget?.ApplySettings(_settings);
     }
 
     private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
